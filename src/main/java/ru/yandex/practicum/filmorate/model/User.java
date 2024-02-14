@@ -6,15 +6,13 @@ import java.time.LocalDate;
 
 @Data
 public class User {
-    private long id = -1;
+    private long id;
 
-    @NotNull(message = "Электронная почта не существует")
-    @NotBlank(message = "Пустая электронная почта")
+    @NotBlank(message = "Электронная почта не существует или пустая")
     @Email(message = "Некорректный формат электронной почты")
     private String email;
 
-    @NotNull(message = "Логин не существует")
-    @NotBlank(message = "Пустой логин")
+    @NotBlank(message = "Логин не существует или пуст")
     @Pattern(regexp = "\\S+", message = "Логин содержит пробелы")
     private String login;
 

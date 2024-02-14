@@ -7,10 +7,9 @@ import javax.validation.constraints.*;
 
 @Data
 public class Film {
-    private long id = -1;
+    private long id;
 
-    @NotNull(message = "Название фильма не существует")
-    @NotBlank(message = "Название фильма не может быть пустым")
+    @NotBlank(message = "Название фильма не может быть пустым и не существовать")
     private String name;
 
     @Size(max = 200, message = "Размер описания не должен превышать 200 символов")

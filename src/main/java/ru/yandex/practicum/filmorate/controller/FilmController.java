@@ -26,18 +26,13 @@ public class FilmController {
     @PutMapping("/films")
     public Film updateFilm(@Valid @RequestBody Film film) throws ValidationException {
         long filmId = film.getId();
-        if (films.containsKey(filmId)) {
-            Film currentFilm = films.get(filmId);
-            currentFilm.setName(film.getName());
-            currentFilm.setDescription(film.getDescription());
-            currentFilm.setReleaseDate(film.getReleaseDate());
-            currentFilm.setDuration(film.getDuration());
-            log.info("Информация о фильме обновлена");
-            return currentFilm;
-        } else {
+        if (!films.containsKey(filmId)) {
             log.warn("Информация о фильме не была обновлена");
             throw new ValidationException("Ошибка при обновлении информации о фильме");
         }
+        films.put(filmId, film);
+        log.info("Информация о фильме обновлена {}", film);
+        return film;
     }
 
     @GetMapping("/films")
