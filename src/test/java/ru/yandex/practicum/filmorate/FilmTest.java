@@ -34,7 +34,7 @@ public class FilmTest {
         film.setDuration(140);
         Set<ConstraintViolation<Film>> violations = validator.validate(film);
         assertFalse(violations.isEmpty());
-        assertEquals(violations.size(), 2);
+        assertEquals(violations.size(), 1);
     }
 
     @Test

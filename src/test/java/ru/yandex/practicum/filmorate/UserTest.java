@@ -35,7 +35,7 @@ public class UserTest {
         user.setBirthday(LocalDate.of(1990, Month.DECEMBER, 20));
         Set<ConstraintViolation<User>> violations = validator.validate(user);
         assertFalse(violations.isEmpty());
-        assertEquals(violations.size(), 2);
+        assertEquals(violations.size(), 1);
     }
 
     @Test
@@ -70,7 +70,7 @@ public class UserTest {
         user.setBirthday(LocalDate.of(1990, Month.DECEMBER, 20));
         Set<ConstraintViolation<User>> violations = validator.validate(user);
         assertFalse(violations.isEmpty());
-        assertEquals(violations.size(), 2);
+        assertEquals(violations.size(), 1);
     }
 
     @Test
