@@ -4,6 +4,8 @@ import lombok.Data;
 import ru.yandex.practicum.filmorate.utils.MinDate;
 import java.time.LocalDate;
 import javax.validation.constraints.*;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
 public class Film {
@@ -21,4 +23,16 @@ public class Film {
 
     @Positive(message = "Длительность фильма не может быть отрицательной или равняться 0")
     private long duration;
+
+    private Set<Long> usersLike = new HashSet<>();
+
+    public Set<Long> addLike(Long userId) {
+        usersLike.add(userId);
+        return usersLike;
+    }
+
+    public Set<Long> deleteLike(Long userId) {
+        usersLike.remove(userId);
+        return usersLike;
+    }
 }

@@ -1,56 +1,90 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.user.UserService;
+import ru.yandex.practicum.filmorate.storage.user.UserStorage;
+
 import javax.validation.Valid;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 @RestController
 @Slf4j
 public class UserController {
-    private HashMap<Long, User> users = new HashMap<>();
-    private long maxId;
+    private UserStorage userStorage;
+    private UserService userService;
+
+    @Autowired
+    public UserController(UserStorage userStorage, UserService userService) {
+        this.userStorage = userStorage;
+        this.userService = userService;
+    }
 
     @PostMapping("/users")
     public User addUser(@Valid @RequestBody User user) {
-        user.setId(generateId());
-        if (user.getName() == null || user.getName().isBlank()) {
-            user.setName(user.getLogin());
-        }
-        users.put(user.getId(), user);
-        log.info("Пользователь {} добавлен", user.getLogin());
+        userStorage.addUser(user);
         return user;
     }
 
     @PutMapping("/users")
     public User updateUser(@Valid @RequestBody User user) throws ValidationException {
-        long userId = user.getId();
-        if (users.containsKey(userId)) {
-            User currentUser = users.get(userId);
-            currentUser.setName(user.getName());
-            currentUser.setEmail(user.getEmail());
-            currentUser.setLogin(user.getLogin());
-            currentUser.setBirthday(user.getBirthday());
-            log.info("Информация о пользователе обновлена");
-            return currentUser;
-        } else {
-            log.warn("Данные пользователя не были обновлены");
-            throw new ValidationException("Ошибка при обновлении информации о пользователе");
-        }
+        userStorage.updateUser(user);
+        return user;
     }
 
     @GetMapping("/users")
     public List<User> getAllUsers() {
-        List<User> resultList = new ArrayList<>(users.values());
-        log.info("Клиент получил список пользователей");
-        return resultList;
+        return userStorage.getAllUsers();
     }
 
-    private long generateId() {
-        return ++maxId;
+    @DeleteMapping("/users")
+    public User deleteUser(long userId) {
+        User userToDelete = userStorage.deleteUser(userId);
+        return userToDelete;
+    }
+
+    @GetMapping("users/{userId}")
+    public User getUserById(@PathVariable long userId) throws ValidationException {
+        return userStorage.getUserById(userId);
+    }
+
+    @PutMapping("/users/{userId}/friends/{friendId}")
+    public List<Long> addFriend(@PathVariable long userId,
+                                @PathVariable long friendId) throws ValidationException {
+        User user = userStorage.getUserById(userId);
+        userService.addFriend(userId, friendId);
+        return new ArrayList<>(user.getFriends());
+    }
+
+    @DeleteMapping("/users/{userId}/friends/{friendId}")
+    public List<Long> deleteFriend(@PathVariable long userId,
+                                   @PathVariable long friendId) throws ValidationException {
+        User user = userStorage.getUserById(userId);
+        userService.deleteFriend(userId, friendId);
+        return new ArrayList<>(user.getFriends());
+    }
+
+    @GetMapping("/users/{userId}/friends")
+    public List<User> getAllUsersFriends(@PathVariable Long userId) throws ValidationException {
+        return userService.getUsersFriends(userId);
+    }
+
+    @GetMapping("/users/{userId}/friends/common/{friendId}")
+    public List<User> getMutualFriends(@PathVariable Long userId,
+                                       @PathVariable Long friendId) throws ValidationException {
+        return userService.getMutualFriends(userId, friendId);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<Map<String, String>> handleUnknownUserException(final NullPointerException e) {
+        return new ResponseEntity<>(
+                Map.of("Ошибка", "Пользователь не найден"),
+                HttpStatus.NOT_FOUND
+        );
     }
 }
