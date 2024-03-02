@@ -1,8 +1,8 @@
 package ru.yandex.practicum.filmorate.storage.film;
-import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
-import ru.yandex.practicum.filmorate.model.Film;
 
+import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
+import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.List;
 
@@ -12,9 +12,9 @@ public interface FilmStorage {
 
     public Film deleteFilm(long filmId);
 
-    public Film updateFilm(Film film) throws ValidationException;
+    public Film updateFilm(Film film) throws FilmNotFoundException;
 
     public List<Film> getAllFilms();
 
-    public Film getFilmById(long filmId);
+    public Film getFilmById(long filmId) throws FilmNotFoundException;
 }

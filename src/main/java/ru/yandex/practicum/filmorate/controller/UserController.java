@@ -2,89 +2,77 @@ package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.user.UserService;
-import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import javax.validation.Valid;
-import java.util.*;
+import java.util.List;
+import java.util.ArrayList;
 
 @RestController
 @Slf4j
 public class UserController {
-    private UserStorage userStorage;
     private UserService userService;
 
     @Autowired
-    public UserController(UserStorage userStorage, UserService userService) {
-        this.userStorage = userStorage;
+    public UserController(UserService userService) {
         this.userService = userService;
     }
 
     @PostMapping("/users")
     public User addUser(@Valid @RequestBody User user) {
-        userStorage.addUser(user);
+        userService.addUser(user);
         return user;
     }
 
     @PutMapping("/users")
-    public User updateUser(@Valid @RequestBody User user) throws ValidationException {
-        userStorage.updateUser(user);
+    public User updateUser(@Valid @RequestBody User user) throws UserNotFoundException {
+        userService.updateUser(user);
         return user;
     }
 
     @GetMapping("/users")
     public List<User> getAllUsers() {
-        return userStorage.getAllUsers();
+        return userService.getAllUsers();
     }
 
     @DeleteMapping("/users")
     public User deleteUser(long userId) {
-        User userToDelete = userStorage.deleteUser(userId);
+        User userToDelete = userService.deleteUser(userId);
         return userToDelete;
     }
 
     @GetMapping("users/{userId}")
-    public User getUserById(@PathVariable long userId) throws ValidationException {
-        return userStorage.getUserById(userId);
+    public User getUserById(@PathVariable long userId) throws UserNotFoundException {
+        return userService.getUserById(userId);
     }
 
     @PutMapping("/users/{userId}/friends/{friendId}")
     public List<Long> addFriend(@PathVariable long userId,
-                                @PathVariable long friendId) throws ValidationException {
-        User user = userStorage.getUserById(userId);
+                                @PathVariable long friendId) throws UserNotFoundException {
+        User user = userService.getUserById(userId);
         userService.addFriend(userId, friendId);
         return new ArrayList<>(user.getFriends());
     }
 
     @DeleteMapping("/users/{userId}/friends/{friendId}")
     public List<Long> deleteFriend(@PathVariable long userId,
-                                   @PathVariable long friendId) throws ValidationException {
-        User user = userStorage.getUserById(userId);
+                                   @PathVariable long friendId) throws UserNotFoundException {
+        User user = userService.getUserById(userId);
         userService.deleteFriend(userId, friendId);
         return new ArrayList<>(user.getFriends());
     }
 
     @GetMapping("/users/{userId}/friends")
-    public List<User> getAllUsersFriends(@PathVariable Long userId) throws ValidationException {
+    public List<User> getAllUsersFriends(@PathVariable Long userId) throws UserNotFoundException {
         return userService.getUsersFriends(userId);
     }
 
     @GetMapping("/users/{userId}/friends/common/{friendId}")
     public List<User> getMutualFriends(@PathVariable Long userId,
-                                       @PathVariable Long friendId) throws ValidationException {
+                                       @PathVariable Long friendId) throws UserNotFoundException {
         return userService.getMutualFriends(userId, friendId);
-    }
-
-    @ExceptionHandler
-    public ResponseEntity<Map<String, String>> handleUnknownUserException(final NullPointerException e) {
-        return new ResponseEntity<>(
-                Map.of("Ошибка", "Пользователь не найден"),
-                HttpStatus.NOT_FOUND
-        );
     }
 }
