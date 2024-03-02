@@ -2,7 +2,7 @@ package ru.yandex.practicum.filmorate.storage.user;
 
 import org.springframework.stereotype.Component;
 
-import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.List;
@@ -31,7 +31,7 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public User updateUser(User user) {
+    public User updateUser(User user) throws UserNotFoundException {
         long userId = user.getId();
         if (users.containsKey(userId)) {
             User currentUser = users.get(userId);
@@ -41,7 +41,7 @@ public class InMemoryUserStorage implements UserStorage {
             currentUser.setBirthday(user.getBirthday());
             return currentUser;
         } else {
-            throw new ValidationException("Пользователь(-и) не найден(-ы)");
+            throw new UserNotFoundException("Пользователь(-и) не найден(-ы)");
         }
     }
 
@@ -52,13 +52,12 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public User getUserById(long userId) {
-        if (users.containsKey(userId)) {
-            User resultUser = users.get(userId);
-            return resultUser;
-        } else {
-            throw new NullPointerException("Пользователь(-и) не найден(-ы)");
+    public User getUserById(long userId) throws UserNotFoundException {
+        if (!users.containsKey(userId)) {
+            throw new UserNotFoundException("Пользователь с id " + userId + " не найден");
+
         }
+        return users.get(userId);
     }
 
     private long generateId() {

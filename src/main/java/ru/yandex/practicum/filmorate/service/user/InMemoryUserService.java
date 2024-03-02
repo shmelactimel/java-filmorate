@@ -54,7 +54,6 @@ public class InMemoryUserService implements UserService {
         return mutualFriends;
     }
 
-
     @Override
     public List<User> getUsersFriends(long userId) throws UserNotFoundException {
         User user = userStorage.getUserById(userId);
