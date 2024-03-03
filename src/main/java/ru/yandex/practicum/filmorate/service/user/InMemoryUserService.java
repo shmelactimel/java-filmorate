@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.service.user;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
@@ -17,7 +16,7 @@ public class InMemoryUserService implements UserService {
     private UserStorage userStorage;
 
     @Override
-    public void addFriend(long userId1, long userId2) throws UserNotFoundException {
+    public void addFriend(long userId1, long userId2) {
         User user1 = userStorage.getUserById(userId1);
         User user2 = userStorage.getUserById(userId2);
         user1.addFriend(userId2);
@@ -25,7 +24,7 @@ public class InMemoryUserService implements UserService {
     }
 
     @Override
-    public void deleteFriend(long userId1, long userId2) throws UserNotFoundException {
+    public void deleteFriend(long userId1, long userId2) {
         User user1 = userStorage.getUserById(userId1);
         User user2 = userStorage.getUserById(userId2);
         user1.removeFriend(userId2);
@@ -33,7 +32,7 @@ public class InMemoryUserService implements UserService {
     }
 
     @Override
-    public List<User> getMutualFriends(long userId1, long userId2) throws UserNotFoundException {
+    public List<User> getMutualFriends(long userId1, long userId2) {
         User user1 = userStorage.getUserById(userId1);
         User user2 = userStorage.getUserById(userId2);
 
@@ -55,7 +54,7 @@ public class InMemoryUserService implements UserService {
     }
 
     @Override
-    public List<User> getUsersFriends(long userId) throws UserNotFoundException {
+    public List<User> getUsersFriends(long userId) {
         User user = userStorage.getUserById(userId);
         List<User> friends = new ArrayList<>();
         for (Long friendId : user.getFriends()) {
@@ -71,7 +70,7 @@ public class InMemoryUserService implements UserService {
     }
 
     @Override
-    public User updateUser(User user) throws UserNotFoundException {
+    public User updateUser(User user) {
         userStorage.updateUser(user);
         return user;
     }
@@ -87,8 +86,7 @@ public class InMemoryUserService implements UserService {
     }
 
     @Override
-    public User getUserById(long userId) throws UserNotFoundException {
-        User user = userStorage.getUserById(userId);
+    public User getUserById(long userId) {
         return userStorage.getUserById(userId);
     }
 }

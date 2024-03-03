@@ -5,13 +5,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.film.FilmService;
-
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 
 import javax.validation.Valid;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @Slf4j
@@ -30,7 +28,7 @@ public class FilmController {
     }
 
     @PutMapping("/films")
-    public Film updateFilm(@Valid @RequestBody Film film) throws FilmNotFoundException {
+    public Film updateFilm(@Valid @RequestBody Film film) {
         filmService.updateFilm(film);
         return film;
     }
@@ -46,33 +44,36 @@ public class FilmController {
     }
 
     @GetMapping("/films/{filmId}")
-    public Film getFilmById(@PathVariable long filmId) throws FilmNotFoundException {
+    public Film getFilmById(@PathVariable long filmId) {
         return filmService.getFilmById(filmId);
     }
 
     @PutMapping("/films/{filmId}/like/{userId}")
-    public Film setLike(@PathVariable Long filmId, @PathVariable Long userId) throws UserNotFoundException,
-            FilmNotFoundException {
-        Film film = filmService.getFilmById(filmId);
-        filmService.addLike(filmId, userId);
-        return film;
+    public Film setLike(@PathVariable Long filmId, @PathVariable Long userId) {
+        try {
+            Film film = filmService.getFilmById(filmId);
+            filmService.addLike(filmId, userId);
+            return film;
+        } catch (FilmNotFoundException | UserNotFoundException e) {
+            log.error("Произошла ошибка при установке лайка: " + e.getMessage());
+            throw new RuntimeException("Произошла ошибка при установке лайка: " + e.getMessage(), e);
+        }
     }
 
     @DeleteMapping("/films/{filmId}/like/{userId}")
-    public Film deleteLike(@PathVariable Long filmId, @PathVariable Long userId) throws FilmNotFoundException,
-            UserNotFoundException {
-        Film film = filmService.getFilmById(filmId);
-        filmService.deleteLike(filmId, userId);
-        return film;
+    public Film deleteLike(@PathVariable Long filmId, @PathVariable Long userId) {
+        try {
+            Film film = filmService.getFilmById(filmId);
+            filmService.deleteLike(filmId, userId);
+            return film;
+        } catch (FilmNotFoundException | UserNotFoundException e) {
+            log.error("Произошла ошибка при удалении лайка: " + e.getMessage());
+            throw new RuntimeException("Произошла ошибка при удалении лайка: " + e.getMessage(), e);
+        }
     }
 
     @GetMapping("/films/popular")
-    public List<Film> getTopRatedFilms(@RequestParam(required = false) Integer count) {
-        if (Optional.ofNullable(count).isEmpty()) {
-            return filmService.getTopRatedFilms(0);
-        } else {
-            return filmService.getTopRatedFilms(count);
-        }
+    public List<Film> getTopRatedFilms(@RequestParam(defaultValue="10") Integer count) {
+        return filmService.getTopRatedFilms(count);
     }
 }
-

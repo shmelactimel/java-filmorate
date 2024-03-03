@@ -31,7 +31,7 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public User updateUser(User user) throws UserNotFoundException {
+    public User updateUser(User user) {
         long userId = user.getId();
         if (users.containsKey(userId)) {
             User currentUser = users.get(userId);
@@ -52,7 +52,7 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public User getUserById(long userId) throws UserNotFoundException {
+    public User getUserById(long userId) {
         if (!users.containsKey(userId)) {
             throw new UserNotFoundException("Пользователь с id " + userId + " не найден");
 

@@ -27,7 +27,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public Film updateFilm(Film film) throws FilmNotFoundException {
+    public Film updateFilm(Film film) {
         long filmId = film.getId();
         if (films.containsKey(filmId)) {
             Film currentFilm = films.get(filmId);
@@ -48,11 +48,12 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public Film getFilmById(long filmId) throws FilmNotFoundException {
-        if (!films.containsKey(filmId)) {
-            throw new FilmNotFoundException("Фильм с id " + filmId + "не найден");
+    public Film getFilmById(long filmId) {
+        Film film = films.get(filmId);
+        if (film == null) {
+            throw new FilmNotFoundException("Фильм с id " + filmId + " не найден");
         }
-        return films.get(filmId);
+        return film;
     }
 
     private long generateId() {
