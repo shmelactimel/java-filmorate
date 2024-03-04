@@ -5,8 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.film.FilmService;
-import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
-import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -50,26 +48,16 @@ public class FilmController {
 
     @PutMapping("/films/{filmId}/like/{userId}")
     public Film setLike(@PathVariable Long filmId, @PathVariable Long userId) {
-        try {
-            Film film = filmService.getFilmById(filmId);
-            filmService.addLike(filmId, userId);
-            return film;
-        } catch (FilmNotFoundException | UserNotFoundException e) {
-            log.error("Произошла ошибка при установке лайка: " + e.getMessage());
-            throw new RuntimeException("Произошла ошибка при установке лайка: " + e.getMessage(), e);
-        }
+        Film film = filmService.getFilmById(filmId);
+        filmService.addLike(filmId, userId);
+        return film;
     }
 
     @DeleteMapping("/films/{filmId}/like/{userId}")
     public Film deleteLike(@PathVariable Long filmId, @PathVariable Long userId) {
-        try {
-            Film film = filmService.getFilmById(filmId);
-            filmService.deleteLike(filmId, userId);
-            return film;
-        } catch (FilmNotFoundException | UserNotFoundException e) {
-            log.error("Произошла ошибка при удалении лайка: " + e.getMessage());
-            throw new RuntimeException("Произошла ошибка при удалении лайка: " + e.getMessage(), e);
-        }
+        Film film = filmService.getFilmById(filmId);
+        filmService.deleteLike(filmId, userId);
+        return film;
     }
 
     @GetMapping("/films/popular")

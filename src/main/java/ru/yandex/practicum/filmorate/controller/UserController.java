@@ -3,7 +3,6 @@ package ru.yandex.practicum.filmorate.controller;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.user.UserService;
 
@@ -27,13 +26,8 @@ public class UserController {
 
     @PutMapping("/users")
     public User updateUser(@RequestBody User user) {
-        try {
-            userService.updateUser(user);
-            return user;
-        } catch (UserNotFoundException e) {
-            log.error("Ошибка при обновлении пользователя: " + e.getMessage());
-            throw new RuntimeException("Ошибка при обновлении пользователя: " + e.getMessage(), e);
-        }
+        userService.updateUser(user);
+        return user;
     }
 
     @GetMapping("/users")
@@ -48,54 +42,29 @@ public class UserController {
 
     @GetMapping("users/{userId}")
     public User getUserById(@PathVariable long userId) {
-        try {
-            return userService.getUserById(userId);
-        } catch (UserNotFoundException e) {
-            log.error("Ошибка при получении пользователя: " + e.getMessage());
-            throw new RuntimeException("Ошибка при получении пользователя: " + e.getMessage(), e);
-        }
+        return userService.getUserById(userId);
     }
 
     @PutMapping("/users/{userId}/friends/{friendId}")
     public void addFriend(@PathVariable long userId,
                           @PathVariable long friendId) {
-        try {
-            userService.addFriend(userId, friendId);
-        } catch (UserNotFoundException e) {
-            log.error("Ошибка при добавлении друга: " + e.getMessage());
-            throw new RuntimeException("Ошибка при добавлении друга: " + e.getMessage(), e);
-        }
+        userService.addFriend(userId, friendId);
     }
 
     @DeleteMapping("/users/{userId}/friends/{friendId}")
     public void deleteFriend(@PathVariable long userId,
                              @PathVariable long friendId) {
-        try {
-            userService.deleteFriend(userId, friendId);
-        } catch (UserNotFoundException e) {
-            log.error("Ошибка при удалении друга: " + e.getMessage());
-            throw new RuntimeException("Ошибка при удалении друга: " + e.getMessage(), e);
-        }
+        userService.deleteFriend(userId, friendId);
     }
 
     @GetMapping("/users/{userId}/friends")
     public List<User> getAllUsersFriends(@PathVariable Long userId) {
-        try {
-            return userService.getUsersFriends(userId);
-        } catch (UserNotFoundException e) {
-            log.error("Ошибка при получении друзей пользователя: " + e.getMessage());
-            throw new RuntimeException("Ошибка при получении друзей пользователя: " + e.getMessage(), e);
-        }
+        return userService.getUsersFriends(userId);
     }
 
     @GetMapping("/users/{userId}/friends/common/{friendId}")
     public List<User> getMutualFriends(@PathVariable Long userId,
                                        @PathVariable Long friendId) {
-        try {
-            return userService.getMutualFriends(userId, friendId);
-        } catch (UserNotFoundException e) {
-            log.error("Ошибка при получении общих друзей: " + e.getMessage());
-            throw new RuntimeException("Ошибка при получении общих друзей: " + e.getMessage(), e);
-        }
+        return userService.getMutualFriends(userId, friendId);
     }
 }

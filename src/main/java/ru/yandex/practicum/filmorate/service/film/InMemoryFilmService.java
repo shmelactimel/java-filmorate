@@ -8,7 +8,7 @@ import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.List;
-import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -35,13 +35,14 @@ public class InMemoryFilmService implements FilmService {
     @Override
     public List<Film> getTopRatedFilms(Integer count) {
         int defaultCount = 10;
-        List<Film> result = new ArrayList<>(filmStorage.getAllFilms());
-        result.sort((o1, o2) -> o2.getUsersLike().size() - o1.getUsersLike().size());
-        if (count != null && count > 0 && count <= result.size()) {
-            return result.subList(0, count);
-        } else {
-            return result.subList(0, Math.min(defaultCount, result.size()));
-        }
+        List<Film> films = filmStorage.getAllFilms();
+
+        List<Film> result = films.stream()
+                .sorted((o1, o2) -> o2.getUsersLike().size() - o1.getUsersLike().size())
+                .limit(count != null && count > 0 ? count : defaultCount)
+                .collect(Collectors.toList());
+
+        return result;
     }
 
     public Film addFilm(Film film) {
