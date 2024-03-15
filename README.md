@@ -2,7 +2,7 @@
 
 ![readmeForDB](https://github.com/shmelactimel/java-filmorate/assets/135132888/7edcab9a-5ecc-478e-91e9-12561e5d3dd9)
 
-[ER-диаграмма](https://dbdiagram.io/d/Personal-65f42561ae072629ce1872c7)
+## [ER-диаграмма](https://dbdiagram.io/d/Personal-65f42561ae072629ce1872c7)
 
 ## Примеры запросов
 
