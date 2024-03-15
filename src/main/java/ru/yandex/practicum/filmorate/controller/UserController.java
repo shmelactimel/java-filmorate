@@ -1,56 +1,70 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.user.UserService;
+
 import javax.validation.Valid;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 @RestController
 @Slf4j
 public class UserController {
-    private HashMap<Long, User> users = new HashMap<>();
-    private long maxId;
+    private UserService userService;
+
+    @Autowired
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
 
     @PostMapping("/users")
     public User addUser(@Valid @RequestBody User user) {
-        user.setId(generateId());
-        if (user.getName() == null || user.getName().isBlank()) {
-            user.setName(user.getLogin());
-        }
-        users.put(user.getId(), user);
-        log.info("Пользователь {} добавлен", user.getLogin());
-        return user;
+        return userService.addUser(user);
     }
 
     @PutMapping("/users")
-    public User updateUser(@Valid @RequestBody User user) throws ValidationException {
-        long userId = user.getId();
-        if (users.containsKey(userId)) {
-            User currentUser = users.get(userId);
-            currentUser.setName(user.getName());
-            currentUser.setEmail(user.getEmail());
-            currentUser.setLogin(user.getLogin());
-            currentUser.setBirthday(user.getBirthday());
-            log.info("Информация о пользователе обновлена");
-            return currentUser;
-        } else {
-            log.warn("Данные пользователя не были обновлены");
-            throw new ValidationException("Ошибка при обновлении информации о пользователе");
-        }
+    public User updateUser(@RequestBody User user) {
+        userService.updateUser(user);
+        return user;
     }
 
     @GetMapping("/users")
     public List<User> getAllUsers() {
-        List<User> resultList = new ArrayList<>(users.values());
-        log.info("Клиент получил список пользователей");
-        return resultList;
+        return userService.getAllUsers();
     }
 
-    private long generateId() {
-        return ++maxId;
+    @DeleteMapping("/users")
+    public void deleteUser(long userId) {
+        userService.deleteUser(userId);
+    }
+
+    @GetMapping("users/{userId}")
+    public User getUserById(@PathVariable long userId) {
+        return userService.getUserById(userId);
+    }
+
+    @PutMapping("/users/{userId}/friends/{friendId}")
+    public void addFriend(@PathVariable long userId,
+                          @PathVariable long friendId) {
+        userService.addFriend(userId, friendId);
+    }
+
+    @DeleteMapping("/users/{userId}/friends/{friendId}")
+    public void deleteFriend(@PathVariable long userId,
+                             @PathVariable long friendId) {
+        userService.deleteFriend(userId, friendId);
+    }
+
+    @GetMapping("/users/{userId}/friends")
+    public List<User> getAllUsersFriends(@PathVariable Long userId) {
+        return userService.getUsersFriends(userId);
+    }
+
+    @GetMapping("/users/{userId}/friends/common/{friendId}")
+    public List<User> getMutualFriends(@PathVariable Long userId,
+                                       @PathVariable Long friendId) {
+        return userService.getMutualFriends(userId, friendId);
     }
 }
