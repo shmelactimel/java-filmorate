@@ -66,10 +66,20 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public void removeFriend(Long userId, Long friendId) {
         User user = mapOfUsers.get(userId);
+        if (user == null) {
+            throw new EntityNotFoundException("User with id " + userId + " not found");
+        }
         User friend = mapOfUsers.get(friendId);
+        if (friend == null) {
+            throw new EntityNotFoundException("Friend with id " + friendId + " not found");
+        }
         Set<Long> friends = user.getFriends();
-        friends.remove(friend.getId());
+        if (!friends.contains(friendId)) {
+            throw new EntityNotFoundException("Friend with id " + friendId + " not found for user with id " + userId);
+        }
+
         Set<Long> friendFriends = friend.getFriends();
+        friends.remove(friend.getId());
         friendFriends.remove(user.getId());
     }
 
