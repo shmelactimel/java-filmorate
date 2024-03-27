@@ -1,67 +1,61 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.service.film.FilmService;
-
-import javax.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import java.util.List;
+import javax.validation.Valid;
+import ru.yandex.practicum.filmorate.exception.EntityAlreadyExistException;
+import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.service.FilmService;
 
 @RestController
 @Slf4j
+@RequiredArgsConstructor
+@RequestMapping(value = "/films")
 public class FilmController {
     private final FilmService filmService;
 
-    @Autowired
-    public FilmController(FilmService filmService) {
-        this.filmService = filmService;
+    @GetMapping
+    public List<Film> getFilms() {
+        log.info("get all films");
+        return filmService.getFilms();
     }
 
-    @PostMapping("/films")
-    public Film addFilm(@Valid @RequestBody Film film) {
-        filmService.addFilm(film);
-        return film;
+    @GetMapping(value = "/{id}")
+    public Film getFilm(@PathVariable(required = true) Long id) {
+        log.info("get film id :" + id);
+        return filmService.getFilm(id);
     }
 
-    @PutMapping("/films")
-    public Film updateFilm(@Valid @RequestBody Film film) {
-        filmService.updateFilm(film);
-        return film;
+    @PostMapping
+    public Film addFilm(@Valid @RequestBody Film film) throws EntityAlreadyExistException {
+        log.info("add new film:" + film.getName());
+        return filmService.addFilm(film);
     }
 
-    @GetMapping("/films")
-    public List<Film> getAllFilms() {
-        return filmService.getAllFilms();
+    @PutMapping(value = {"","/{filmId}"})
+    public Film updateFilm(@PathVariable(required = false) Long filmId, @Valid @RequestBody Film film) {
+        return filmService.updateFilm(filmId, film);
     }
 
-    @DeleteMapping("/films")
-    public Film deleteFilm(long filmId) {
-        return filmService.deleteFilm(filmId);
+    @PutMapping(value = "/{id}/like/{userId}")
+    public void addLike(@PathVariable Long id,
+                        @PathVariable Long userId) {
+        log.info("add like to movie id:" + id + " from user id:" + userId);
+        filmService.addLike(id, userId);
     }
 
-    @GetMapping("/films/{filmId}")
-    public Film getFilmById(@PathVariable long filmId) {
-        return filmService.getFilmById(filmId);
+    @DeleteMapping(value = "/{id}/like/{userId}")
+    public void removeLike(@PathVariable Long id,
+                           @PathVariable Long userId) {
+        log.info("remove like from movie id:" + id + " from user id:" + userId);
+        filmService.removeLike(id, userId);
     }
 
-    @PutMapping("/films/{filmId}/like/{userId}")
-    public Film setLike(@PathVariable Long filmId, @PathVariable Long userId) {
-        Film film = filmService.getFilmById(filmId);
-        filmService.addLike(filmId, userId);
-        return film;
-    }
-
-    @DeleteMapping("/films/{filmId}/like/{userId}")
-    public Film deleteLike(@PathVariable Long filmId, @PathVariable Long userId) {
-        Film film = filmService.getFilmById(filmId);
-        filmService.deleteLike(filmId, userId);
-        return film;
-    }
-
-    @GetMapping("/films/popular")
-    public List<Film> getTopRatedFilms(@RequestParam(defaultValue = "10") Integer count) {
-        return filmService.getTopRatedFilms(count);
+    @GetMapping(value = "/popular")
+    public List<Film> getTopFilms(@RequestParam(defaultValue = "10", required = false) Integer count) {
+        log.info("get top " + count + " movies");
+        return filmService.getTopFilms(count);
     }
 }

@@ -1,38 +1,41 @@
 package ru.yandex.practicum.filmorate.model;
 
 import lombok.Data;
-import ru.yandex.practicum.filmorate.utils.MinDate;
+import org.springframework.boot.convert.DurationUnit;
+import ru.yandex.practicum.filmorate.utils.DurationAnnotation;
+import ru.yandex.practicum.filmorate.utils.ReleaseDateAnnotation;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 import java.time.LocalDate;
-import javax.validation.constraints.*;
-import java.util.HashSet;
-import java.util.Set;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
+import java.util.*;
 
 @Data
 public class Film {
-    private long id;
-
-    @NotBlank(message = "Название фильма не может быть пустым и не существовать")
+    private Long id;
+    @NotBlank(message = "name cannot be blank")
     private String name;
-
-    @Size(max = 200, message = "Размер описания не должен превышать 200 символов")
+    @Size(max = 200)
     private String description;
-
-    @MinDate
-    @NotNull(message = "Дата выхода не может быть ранее 28 декабря 1895 года")
+    @ReleaseDateAnnotation
     private LocalDate releaseDate;
+    @DurationUnit(ChronoUnit.MINUTES)
+    @DurationAnnotation
+    private Duration duration;
+    private List<Genre> genres = new ArrayList<>();
+    private Mpa mpa;
+    private Set<Long> likes = new HashSet<>();
 
-    @Positive(message = "Длительность фильма не может быть отрицательной или равняться 0")
-    private long duration;
-
-    private Set<Long> usersLike = new HashSet<>();
-
-    public Set<Long> addLike(Long userId) {
-        usersLike.add(userId);
-        return usersLike;
+    public void setDuration(long minutes) {
+        duration = Duration.ofMinutes(minutes);
     }
 
-    public Set<Long> deleteLike(Long userId) {
-        usersLike.remove(userId);
-        return usersLike;
+    public long getDuration() {
+        return duration.toMinutes();
+    }
+
+    public int getLikesCount() {
+        return likes.size();
     }
 }

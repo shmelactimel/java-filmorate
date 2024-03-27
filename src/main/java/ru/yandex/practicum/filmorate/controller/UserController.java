@@ -1,70 +1,76 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.service.user.UserService;
-
 import javax.validation.Valid;
 import java.util.List;
+import java.util.Set;
+import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.exception.EntityAlreadyExistException;
+import ru.yandex.practicum.filmorate.service.UserService;
 
 @RestController
 @Slf4j
+@RequiredArgsConstructor
+@RequestMapping(value = "/users")
 public class UserController {
-    private UserService userService;
+    private final UserService userService;
 
-    @Autowired
-    public UserController(UserService userService) {
-        this.userService = userService;
+    @GetMapping
+    public List<User> getUsers() {
+        log.info("get all users");
+        return userService.getUsers();
     }
 
-    @PostMapping("/users")
-    public User addUser(@Valid @RequestBody User user) {
+    @PostMapping
+    public User addUser(@Valid @RequestBody User user) throws EntityAlreadyExistException {
+        log.info("add new user:" + user.getLogin());
         return userService.addUser(user);
     }
 
-    @PutMapping("/users")
-    public User updateUser(@RequestBody User user) {
-        userService.updateUser(user);
-        return user;
+    @PutMapping(value = {"","/{userId}"})
+    public User updateUser(@PathVariable(required = false) Long userId, @Valid @RequestBody User user) {
+        return userService.updateUser(userId, user);
     }
 
-    @GetMapping("/users")
-    public List<User> getAllUsers() {
-        return userService.getAllUsers();
+    @GetMapping(value = "/{id}")
+    public User getUser(@PathVariable Long id) {
+        log.info("get user id :" + id);
+        return userService.getUser(id);
     }
 
-    @DeleteMapping("/users")
-    public void deleteUser(long userId) {
-        userService.deleteUser(userId);
+    @GetMapping(value = "/{id}/friends")
+    public Set<User> getUserFriends(@PathVariable Long id) {
+        log.info("get user id :" + id + " friends");
+        return userService.getFriends(id);
     }
 
-    @GetMapping("users/{userId}")
-    public User getUserById(@PathVariable long userId) {
-        return userService.getUserById(userId);
+    @PutMapping(value = "/{id}/friends/{friendId}")
+    public void addFriend(@PathVariable Long id,
+                          @PathVariable Long friendId) {
+        log.info("add friend id :" + friendId + " to user id :" + id);
+        userService.addFriend(id, friendId);
     }
 
-    @PutMapping("/users/{userId}/friends/{friendId}")
-    public void addFriend(@PathVariable long userId,
-                          @PathVariable long friendId) {
-        userService.addFriend(userId, friendId);
+    @DeleteMapping(value = "/{id}/friends/{friendId}")
+    public void removeFriend(@PathVariable Long id,
+                             @PathVariable Long friendId) {
+        log.info("remove friend id :" + friendId + " from user id :" + id);
+        userService.removeFriend(id, friendId);
     }
 
-    @DeleteMapping("/users/{userId}/friends/{friendId}")
-    public void deleteFriend(@PathVariable long userId,
-                             @PathVariable long friendId) {
-        userService.deleteFriend(userId, friendId);
-    }
-
-    @GetMapping("/users/{userId}/friends")
-    public List<User> getAllUsersFriends(@PathVariable Long userId) {
-        return userService.getUsersFriends(userId);
-    }
-
-    @GetMapping("/users/{userId}/friends/common/{friendId}")
-    public List<User> getMutualFriends(@PathVariable Long userId,
+    @GetMapping(value = "/{id}/friends/common/{friendId}")
+    public List<User> getCommonFriends(@PathVariable Long id,
                                        @PathVariable Long friendId) {
-        return userService.getMutualFriends(userId, friendId);
+        log.info("get common friends between user id :" + id + " and friend id :" + friendId);
+        return userService.getCommonFriends(id, friendId);
+    }
+
+    @PutMapping(value = "/{id}/friends/common/{friendId}")
+    public void approveFriend(@PathVariable Long id,
+                              @PathVariable Long friendId) {
+        log.info("approve friend id : " + friendId + " for user id :" + id);
+        userService.approveFriend(id, friendId);
     }
 }
