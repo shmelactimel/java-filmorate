@@ -1,38 +1,45 @@
 package ru.yandex.practicum.filmorate.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Data;
-import ru.yandex.practicum.filmorate.utils.MinDate;
+import lombok.Setter;
+
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 import java.time.LocalDate;
-import javax.validation.constraints.*;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * Film.
+ */
 @Data
+@AllArgsConstructor
 public class Film {
     private long id;
-
-    @NotBlank(message = "Название фильма не может быть пустым и не существовать")
+    @NotBlank
     private String name;
-
-    @Size(max = 200, message = "Размер описания не должен превышать 200 символов")
+    @Size(max = 200)
     private String description;
-
-    @MinDate
-    @NotNull(message = "Дата выхода не может быть ранее 28 декабря 1895 года")
     private LocalDate releaseDate;
+    @Min(1)
+    private int duration;
+    private RatingMpa mpa;
+    @Setter(AccessLevel.NONE)
+    private final Set<Genre> genres;
+    @Setter(AccessLevel.NONE)
+    @JsonIgnore
+    private final Set<Long> likes;
 
-    @Positive(message = "Длительность фильма не может быть отрицательной или равняться 0")
-    private long duration;
-
-    private Set<Long> usersLike = new HashSet<>();
-
-    public Set<Long> addLike(Long userId) {
-        usersLike.add(userId);
-        return usersLike;
+    public Film() {
+        this.likes = new HashSet<>();
+        this.genres = new HashSet<>();
     }
 
-    public Set<Long> deleteLike(Long userId) {
-        usersLike.remove(userId);
-        return usersLike;
+    public boolean addGenre(Genre genre) {
+        return genres.add(genre);
     }
 }
