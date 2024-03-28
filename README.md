@@ -1,40 +1,55 @@
 # java-filmorate
 
-![image](https://github.com/shmelactimel/java-filmorate/assets/135132888/ed89d0eb-005a-46d5-9236-04df322ac1fc)
+![image](https://github.com/shmelactimel/java-filmorate/assets/135132888/6a916ef0-90f2-4682-a60a-0866e6d8b18f)
+
 
 ## Примеры запросов
 
-Получить email подтвержденных друзей Василия:
-```
-SELECT us.email
-FROM users AS us
-INNER JOIN 
-	(SELECT *
-	FROM friends AS f
-	INNER JOIN users AS u ON u.user_id = f.user_id
-	WHERE name = 'Vasilii') as s ON us.user_id = s.friends_id
-WHERE s.approved = 'true'; 
-```
-Получить название худшего фильма о войне по мнению пользователей:
-```
-SELECT m.name
-FROM movies AS m
-INNER JOIN likes AS l ON m.film_id = l.likes_id
-WHERE movie_genre = 'War'
-GROUP BY m.name
-ORDER BY COUNT(m.name) DESC
-LIMIT 1;
-```
-Получить всех пользователей с email начинающимся с 'c':
+Get all users:
 ```
 SELECT *
-FROM users AS u
-WHERE u.email LIKE 'c%';
+FROM user;
+Get user by id == 1:
+
+SELECT *
+FROM user
+WHERE user_id=1;
 ```
-Получить топ 3 названия самых свежих вышедших фильма, начиная с 2015 года по убыванию:
+Get all friends of user with id == 1:
 ```
-SELECT name
-FROM movies AS m
-WHERE EXTRACT(YEAR FROM m.releasedate) > '2014'
-ORDER BY m.releasedate DESC;
+SELECT user_id,
+       email,
+       login,
+       name,
+       birthdate
+FROM user
+WHERE user_id IN
+    (SELECT friend_id
+     FROM friends
+     WHERE user_id = 1);
+```
+Get all films:
+```
+SELECT *
+FROM film;
+Get film by id == 1:
+
+SELECT *
+FROM film
+WHERE film_id=1;
+```
+Get 10 most popular films:
+```
+SELECT f.film_id,
+       f.name,
+       f.description,
+       f.release_date,
+       f.duration,
+       r.name
+FROM film AS f
+LEFT JOIN rating AS r ON f.rating_id = r.rating_id
+LEFT JOIN film_likes AS l ON f.film_id = l.film_id
+GROUP BY f.film_id
+ORDER BY count(l.user_id) DESC
+LIMIT 10;
 ```
