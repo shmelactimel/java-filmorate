@@ -1,23 +1,34 @@
 package ru.yandex.practicum.filmorate.model;
 
-import lombok.Data;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.*;
+
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Pattern;
 import java.time.LocalDate;
-import javax.validation.constraints.*;
 import java.util.HashSet;
 import java.util.Set;
-import ru.yandex.practicum.filmorate.utils.CustomEmailValidator;
 
 @Data
+@Builder
+@AllArgsConstructor
 public class User {
-    private Long id;
-    @CustomEmailValidator
+
+    private long id;
+    @NotBlank
+    @Email
     private String email;
-    @NotBlank(message = "login cannot be blank")
-    @Pattern(regexp = "[a-zA-Z0-9]+", message = "no special characters or space allowed.")
+    @NotBlank
+    @Pattern(regexp = "\\S+")
     private String login;
     private String name;
-    @NotNull
-    @Past
     private LocalDate birthday;
-    private Set<Long> friends = new HashSet<>();
+    @Setter(AccessLevel.NONE)
+    @JsonIgnore
+    private final Set<Long> friends;
+
+    public User() {
+        this.friends = new HashSet<>();
+    }
 }

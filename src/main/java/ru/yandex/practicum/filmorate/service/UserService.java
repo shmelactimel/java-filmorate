@@ -1,68 +1,64 @@
 package ru.yandex.practicum.filmorate.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.List;
-import ru.yandex.practicum.filmorate.exception.EntityAlreadyExistException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
+import ru.yandex.practicum.filmorate.utils.Validator;
+
+import javax.validation.ValidationException;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class UserService {
+
+    @Qualifier("userDbStorage")
     private final UserStorage userStorage;
 
-    @Autowired
-    public UserService(@Qualifier("userDbStorage") UserStorage userStorage) {
-        this.userStorage = userStorage;
+    public User addUser(User user) {
+        if (!Validator.isUserValid(user)) {
+            throw new ValidationException("POST /users: birthdate must not be in the future");
+        }
+        return userStorage.create(user);
     }
 
-    public void addFriend(Long userId, Long friendId) {
-        userStorage.addFriend(userId, friendId);
+    public User changeUser(User user) {
+        if (!Validator.isUserValid(user)) {
+            throw new ValidationException("PUT /users: birthdate must not be in the future");
+        }
+        return userStorage.update(user);
     }
 
     public List<User> getUsers() {
-        return userStorage.getUsers();
+        return new ArrayList<>(userStorage.findAll());
     }
 
-    public User addUser(User user) throws EntityAlreadyExistException {
-        return userStorage.addUser(user);
+    public void addFriends(Long id, Long friendId) {
+        if (id.equals(friendId)) {
+            throw new ValidationException("PUT friends: id equals friendId");
+        }
+        userStorage.addFriends(id, friendId);
     }
 
-    public User updateUser(Long userId, User user) {
-        return userStorage.updateUser(userId, user);
+    public void deleteFriends(Long id, Long friendId) {
+        if (id.equals(friendId)) {
+            throw new ValidationException("DELETE friends: id equals friendId");
+        }
+        userStorage.deleteFriends(id, friendId);
     }
 
-    public User getUser(Long id) {
-        return userStorage.getUser(id);
+    public List<User> getFriends(Long id) {
+        return userStorage.getFriends(id);
     }
 
-    public void removeFriend(Long userId, Long friendId) {
-        userStorage.removeFriend(userId, friendId);
+    public List<User> getCommonFriends(Long id, Long secondId) {
+        if (id.equals(secondId)) {
+            throw new ValidationException("firstId equals friendId");
+        }
+        return userStorage.getCommonFriends(id, secondId);
     }
 
-    public Set<User> getFriends(Long userId) {
-        return userStorage.getFriends(userId);
-    }
-
-    public List<User> getCommonFriends(Long userId, Long friendId) {
-        return userStorage.getCommonFriends(userId, friendId);
-    }
-
-    public void approveFriend(Long id, Long friendId) {
-        userStorage.approveFriend(id, friendId);
-    }
-
-    public static Map<String, Object> toMap(User user) {
-        Map<String, Object> values = new HashMap<>();
-        values.put("login", user.getLogin());
-        values.put("name", user.getName());
-        values.put("email", user.getEmail());
-        values.put("birthday", user.getBirthday());
-        return values;
-    }
 }

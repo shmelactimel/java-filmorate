@@ -1,64 +1,69 @@
 package ru.yandex.practicum.filmorate.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import ru.yandex.practicum.filmorate.exception.EntityAlreadyExistException;
-import ru.yandex.practicum.filmorate.storage.FilmStorage;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
+import ru.yandex.practicum.filmorate.utils.Validator;
+
+import javax.validation.ValidationException;
+import java.util.Collection;
+import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class FilmService {
+
+    @Qualifier("filmDbStorage")
     private final FilmStorage filmStorage;
+    @Qualifier("userDbStorage")
     private final UserStorage userStorage;
 
-    @Autowired
-    public FilmService(@Qualifier("filmDbStorage") FilmStorage filmStorage,@Qualifier("userDbStorage") UserStorage userStorage) {
-        this.filmStorage = filmStorage;
-        this.userStorage = userStorage;
+    public Film addFilm(Film film) {
+        if (!Validator.isFilmValid(film)) {
+            throw new ValidationException("POST /films: release date must be after 1895-12-28");
+        }
+        return filmStorage.create(film);
+    }
+
+    public Film changeFilm(Film film) {
+        if (!Validator.isFilmValid(film)) {
+            throw new ValidationException("PUT /films: release date must be after 1895-12-28");
+        }
+        var oldFilm = filmStorage.findById(film.getId());
+        if (oldFilm == null) {
+            throw new NotFoundException(String.format("POST /films: film with id %d not found ", film.getId()));
+        }
+        return filmStorage.update(film);
+    }
+
+    public Collection<Film> getFilms() {
+        return filmStorage.findAll();
     }
 
     public Film getFilm(Long id) {
-        return filmStorage.getFilm(id);
+        return filmStorage.findById(id);
     }
 
-    public List<Film> getFilms() {
-        return filmStorage.getFilms();
+    public void putLike(Long id, Long userId) {
+        var user = userStorage.findById(userId);
+        if (user == null) {
+            throw new NotFoundException(String.format("PUT like: user id %d not found", userId));
+        }
+        filmStorage.putLike(id, userId);
     }
 
-    public Film addFilm(Film film) throws EntityAlreadyExistException {
-        return filmStorage.addFilm(film);
+    public void deleteLike(Long id, Long userId) {
+        filmStorage.deleteLike(id, userId);
     }
 
-    public Film updateFilm(Long filmId, Film film) {
-        return filmStorage.updateFilm(filmId, film);
-    }
-
-    public void addLike(Long filmId, Long userId) {
-        filmStorage.addLike(filmId, userId);
-    }
-
-    public void removeLike(Long filmId, Long userId) {
-        filmStorage.removeLike(filmId, userId);
-    }
-
-    public List<Film> getTopFilms(Integer count) {
-        return filmStorage.getTopFilms(count);
-    }
-
-    public static Map<String, Object> toMap(Film film) {
-        Map<String, Object> values = new HashMap<>();
-        values.put("name", film.getName());
-        values.put("description", film.getDescription());
-        values.put("release_date", film.getReleaseDate());
-        values.put("duration", film.getDuration());
-        values.put("movie_mpa_id", film.getMpa().getId());
-        return values;
+    public List<Film> getPopular(int count) {
+        if (count < 1) {
+            throw new ValidationException("GET popular: count must be greater than 0");
+        }
+        return filmStorage.getPopular(count);
     }
 }

@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class Genre {
+public class RatingMpa {
     private int id;
     private String name;
 }

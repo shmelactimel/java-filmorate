@@ -1,26 +1,25 @@
 package ru.yandex.practicum.filmorate.storage;
 
-import java.util.List;
-import java.util.Set;
-import ru.yandex.practicum.filmorate.exception.EntityAlreadyExistException;
 import ru.yandex.practicum.filmorate.model.User;
 
+import java.util.Collection;
+import java.util.List;
+
 public interface UserStorage {
-    List<User> getUsers();
 
-    User getUser(Long userId);
+    User create(User user);
 
-    User addUser(User user) throws EntityAlreadyExistException;
+    User update(User user);
 
-    User updateUser(Long userId, User user);
+    Collection<User> findAll();
 
-    void addFriend(Long userId, Long friendId);
+    User findById(Long id);
 
-    void removeFriend(Long userId, Long friendId);
+    void addFriends(Long id, Long friendId);
 
-    List<User> getCommonFriends(Long userId, Long friendId);
+    void deleteFriends(Long id, Long friendId);
 
-    Set<User> getFriends(Long userId);
+    List<User> getFriends(Long id);
 
-    void approveFriend(Long id, Long friendId);
+    List<User> getCommonFriends(Long id, Long otherId);
 }

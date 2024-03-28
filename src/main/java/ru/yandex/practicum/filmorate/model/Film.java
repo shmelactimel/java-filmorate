@@ -1,41 +1,45 @@
 package ru.yandex.practicum.filmorate.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Data;
-import org.springframework.boot.convert.DurationUnit;
-import ru.yandex.practicum.filmorate.utils.DurationAnnotation;
-import ru.yandex.practicum.filmorate.utils.ReleaseDateAnnotation;
+import lombok.Setter;
+
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 import java.time.LocalDate;
-import java.time.Duration;
-import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
 
+/**
+ * Film.
+ */
 @Data
+@AllArgsConstructor
 public class Film {
-    private Long id;
-    @NotBlank(message = "name cannot be blank")
+    private long id;
+    @NotBlank
     private String name;
     @Size(max = 200)
     private String description;
-    @ReleaseDateAnnotation
     private LocalDate releaseDate;
-    @DurationUnit(ChronoUnit.MINUTES)
-    @DurationAnnotation
-    private Duration duration;
-    private List<Genre> genres = new ArrayList<>();
-    private Mpa mpa;
-    private Set<Long> likes = new HashSet<>();
+    @Min(1)
+    private int duration;
+    private RatingMpa mpa;
+    @Setter(AccessLevel.NONE)
+    private final Set<Genre> genres;
+    @Setter(AccessLevel.NONE)
+    @JsonIgnore
+    private final Set<Long> likes;
 
-    public void setDuration(long minutes) {
-        duration = Duration.ofMinutes(minutes);
+    public Film() {
+        this.likes = new HashSet<>();
+        this.genres = new HashSet<>();
     }
 
-    public long getDuration() {
-        return duration.toMinutes();
-    }
-
-    public int getLikesCount() {
-        return likes.size();
+    public boolean addGenre(Genre genre) {
+        return genres.add(genre);
     }
 }
