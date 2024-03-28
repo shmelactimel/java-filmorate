@@ -1,4 +1,4 @@
-package ru.yandex.practicum.storage.impl.dao;
+package ru.yandex.practicum.filmorate.storage.impl.dao;
 
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;
